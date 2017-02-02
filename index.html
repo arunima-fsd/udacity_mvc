@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Your Moving Companion</title>
+    <style>
+        .container {
+            margin-right: 150px;
+            margin-left: 150px;
+            margin-top: 100px;
+            margin-bottom: 100px;
+        }
+
+        .cat-container {
+            max-width: 100%;
+            margin-top: 40px;
+            display: flex;
+
+        }
+
+
+
+        .list-container{
+            margin-bottom: 70px;
+        }
+
+        .cat_img_style{
+            cursor:pointer;
+            border: none;
+            height: 270px;
+            width: 270px;
+            margin: 40px;
+        }
+
+        .cat{
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+
+    </style>
+</head>
+<body>
+<div class="container">
+    <fieldset class="list-container">
+        <legend>
+            <h2> Click me!!! Meow Meow!!!</h2>
+        </legend>
+
+        <form id="cat-form">
+            <p>Press enter to add new cat. Purr!!!</p>
+            <input type="text" value="" id="cat-name">
+         </form>
+
+        <ul class="all-cats">
+        </ul>
+         <div class="cat">
+         </div>
+    </fieldset>
+
+
+
+</div>
+
+<script src="js/libs/jquery.min.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
