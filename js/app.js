@@ -8,24 +8,12 @@ $(function () {
                 localStorage.cats = JSON.stringify([]);
             }
             if(!localStorage.currentCat){
-                localStorage.currentCat = JSON.stringify([]);
+                localStorage.currentCat = JSON.stringify({});
             }
         },
         getAllCats: function () {
             var data = JSON.parse(localStorage.cats);
             return data;
-        },
-        getCatObject:function (id) {
-            var data = JSON.parse(localStorage.cats);
-            var index;
-            for(var i = 0; i < data.length; i++){
-                if(data[i].cat_id === id){
-                    index = i;
-                    break;
-
-                }
-            }
-            return data[i];
         },
         addCatObject:function(obj){
             var data = JSON.parse(localStorage.cats);
@@ -36,14 +24,16 @@ $(function () {
             var data = JSON.parse(localStorage.cats);
             for(var i = 0; i < data.length; i++){
                 if(data[i].cat_id === id){
-                    localStorage.currentCat = JSON.stringify([data[i]]);
+                    localStorage.currentCat = JSON.stringify(data[i]);
+                    console.log(localStorage.currentCat);
                     break;
                 }
             }
 
         },
         getCurrentCat: function () {
-            return JSON.parse(localStorage.currentCat)[0];
+            cat = JSON.parse(localStorage.currentCat);
+            return cat;
         },
         modifyCatCount: function (id, count) {
             var data = JSON.parse(localStorage.cats);
@@ -57,18 +47,18 @@ $(function () {
         },
         modifyCurrCatCount: function (count) {
           var cat = JSON.parse(localStorage.currentCat);
-          console.log(cat);
-          cat[0].count = count;
+          cat.count = count;
           localStorage.currentCat = JSON.stringify(cat);
         },
         modifyCat: function (cat) {
             var data = JSON.parse(localStorage.cats);
             for(var i = 0; i < data.length; i++){
-                if(data[i].cat_id === cat.id){
+                if(data[i].cat_id === cat.cat_id){
                     data[i] = cat;
                     break;
                 }
             }
+            console.log(data);
             localStorage.cats = JSON.stringify(data);
 
         }
@@ -104,23 +94,17 @@ $(function () {
         },
         modifyCurrCatCount: function (count) {
             model.modifyCurrCatCount(count);
-
         },
         modifyCat:function (cat, name, url, count) {
             cat.cat_name = name;
             cat.image_url = url;
             cat.count = count;
             model.modifyCat(cat);
-            view1.init();
-            view2.render(cat);
-
         },
         init:function () {
             model.init();
             view1.init();
             view2.init();
-            admin_view.init();
-
         }
     };
 
@@ -134,9 +118,8 @@ $(function () {
                 $('#cat-name').val("");
 
             });
-            if(octopus.getCurrentCat()){
-                view2.render(octopus.getCurrentCat());
-            }
+
+
             view1.render();
         },
         render:function () {
@@ -145,7 +128,6 @@ $(function () {
                 htmlStr += '<li class="cat-items" id="cat'+cat.cat_id.toString() +'">'+
                     cat.cat_name + '</li>';
             });
-
             this.cat_list.html(htmlStr);
             view2.init();
         }
@@ -158,50 +140,63 @@ $(function () {
             cat_items.click(function () {
                 var id = parseInt((this.id.slice(3)));
                 octopus.setCurrentCat(id);
-                var cat = octopus.getCurrentCat();
-                view2.render(cat);
+                view2.render();
             });
+            view2.render();
         },
-        render: function (cat) {
+        render: function () {
             var displayArea = $('.cat');
-            displayArea.html('<h3> '+ cat.cat_name +'</h3> ' +
+            var cat = octopus.getCurrentCat();
+            if(!jQuery.isEmptyObject(cat)){
+                displayArea.html('<h3> '+ cat.cat_name +'</h3> ' +
                     '<img class="cat_img_style" src="'+ cat.image_url +'"> <h4>Count:'+ cat.count +'</h4>' +
-                '<input id="admin-mode" type="button" value="admin">');
-            admin_view.init(cat);
-            var cat_img = $('.cat_img_style');
-            cat_img.click(function () {
-                cat.count += 1;
-                octopus.modifyCount(cat.cat_id, cat.count);
-                octopus.modifyCurrCatCount(cat.count);
-                $('.cat').find('h4').text('Count: '+ cat.count);
-            });
-
-
+                    '<input id="admin-mode" type="button" value="admin">');
+                var cat_img = $('.cat_img_style');
+                cat_img.click(function () {
+                    var cat = octopus.getCurrentCat();
+                    cat.count += 1;
+                    octopus.modifyCount(cat.cat_id, cat.count);
+                    octopus.modifyCurrCatCount(cat.count);
+                    $('.cat').find('h4').text('Count: '+ cat.count);
+                });
+                admin_view.init();
+            }
         }
     };
 
     var admin_view={
-        init:function (cat) {
+        init:function() {
             var admin = $('#admin-mode');
             var adminDiv = $('#admin');
             admin.click(function () {
                 adminDiv.toggleClass('hideAdmin');
-
+                admin_view.render();
             });
-            admin_view.render(cat);
+
         },
-        render:function (cat) {
+        render:function() {
             var cancelBtn = $('#cancelBtn');
-            var saveBtn = $('#saveBtn');
+            var saveBtn = $('#submitBtn');
+            var cat = octopus.getCurrentCat();
+            if(!jQuery.isEmptyObject(cat)){
+                $('#catName').val(cat.cat_name);
+                $('#imageUrl').val(cat.image_url);
+                $('#clicks').val(cat.count);
+
+            }
             cancelBtn.click(function () {
                 $('#admin').toggleClass('hideAdmin');
+                octopus.init();
             });
 
             saveBtn.click(function () {
+                var cat = octopus.getCurrentCat();
                 var cat_name = $('#catName').val();
                 var image_url = $('#imageUrl').val();
                 var count = $('#clicks').val();
                 octopus.modifyCat(cat, cat_name, image_url, count);
+                octopus.setCurrentCat(cat.cat_id);
+                octopus.init();
                 $('#admin').toggleClass('hideAdmin');
             });
 
